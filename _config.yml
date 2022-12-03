@@ -1,3 +1,5 @@
-theme: jekyll-theme-minimal
-title: John's homepage
-description: Bookmark this to keep an eye on my project updates!
+remote_theme: pages-themes/minimal@v0.2.0
+plugins:
+- jekyll-remote-theme 
+title: John Sun Tech Notes
+description: Bookmark this to keep a handy reference 

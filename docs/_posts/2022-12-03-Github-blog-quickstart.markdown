@@ -32,7 +32,7 @@ Finally, I modified the configuration GemFile with `vi GemFile` (requires vi to 
 
 First I commented out `gem "jekyll", "~> 4.3.1"`
 
-Then I modified the line starting `gem "github-pages"` to 
+Then I modified the line starting `gem "github-pages"` to
 
 `gem "github-pages", "~> 227", group: :jekyll_plugins`
 
@@ -53,12 +53,19 @@ Things I want to learn next are how to add pictures, categorise articles into th
 
 Stay Tuned (and hopefully I don't procrastinate this)
 
-Update: Turns out the URL is generated from the categories, so as above I would have two categories of jekyll and update - by removing the categories section, I was able to make the blog post directly link appear without categories appearing in the URL.
+Updates: Turns out the URL is generated from the categories, so as above I would have two categories of jekyll and update - by removing the categories section, I was able to make the blog post directly link appear without categories appearing in the URL.
 
-<img src="{prepend: site.url}/images/2022/removeCategories.png" alt="test1" />
+![RemoveCategories](/images/2022/removeCategories.png)
 
 
-![test2](/images/2022/removeCategories.png)
+As my build directory on the Github page was set up in the docs folder rather than the root folder, I had to put my images folder within the docs folder for it to be referencable by Jekyll.
+
+Eg.
+{% highlight ruby %}
+![RemoveCategories](/images/2022/removeCategories.png)
+{% endhighlight %}
+
+On the last item, there is a plugin that allows for the automation of this [jekyll-postfiles] , but the plugin is not supported to be used with Github Pages
 
 Below is some helpful source doco as part of the default page but I'll leave in for interest:
 
@@ -71,3 +78,4 @@ Check out the [Jekyll docs][jekyll-docs] for more info on how to get the most ou
 [quickstart-guide-on-Github]: https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/about-github-pages-and-jekyll
 [VS-Code-Container-Guide]: https://code.visualstudio.com/docs/devcontainers/containers
 [Docker-Image-Source]: https://github.com/microsoft/vscode-dev-containers/blob/v0.122.1/containers/ubuntu/.devcontainer/base.Dockerfile
+[jekyll-postfiles]: https://nhoizey.github.io/jekyll-postfiles/

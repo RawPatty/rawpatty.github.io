@@ -2,7 +2,7 @@
 layout: post
 title:  "Github.io Blog Quickstart for Windows 10"
 date:   2022-12-03 08:47:29 +0000
-categories: Blog jekyll
+categories: 
 ---
 Having written a few blog posts in the past on my medium blog, I was inspired to move to blogging on Github pages like a "real" developer now that I've gotten comfortable writing posts.
 
@@ -46,6 +46,8 @@ eg.
 
 Things I want to learn next are how to add pictures, categorise articles into their own repos, and how to simplify the URL so it removes the `jekyll/update` path
 Stay Tuned (and hopefully I don't procrastinate this)
+
+Update: Turns out the URL is generated from the categories, so as above I would have two categories of jekyll and update
 
 Below is some helpful source doco as part of the default page but I'll leave in for interest:
 

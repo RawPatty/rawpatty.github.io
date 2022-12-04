@@ -55,7 +55,7 @@ Stay Tuned (and hopefully I don't procrastinate this)
 
 Update: Turns out the URL is generated from the categories, so as above I would have two categories of jekyll and update - by removing the categories section, I was able to make the blog post directly link appear without categories appearing in the URL.
 
-![image](../../images/2022/removeCategories.png)
+![image](/images/2022/removeCategories.png)
 
 
 Below is some helpful source doco as part of the default page but I'll leave in for interest:

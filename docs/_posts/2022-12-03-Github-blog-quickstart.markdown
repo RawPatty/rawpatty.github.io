@@ -55,10 +55,10 @@ Stay Tuned (and hopefully I don't procrastinate this)
 
 Update: Turns out the URL is generated from the categories, so as above I would have two categories of jekyll and update - by removing the categories section, I was able to make the blog post directly link appear without categories appearing in the URL.
 
-<img src="{ prepend: site.url}../images/2022/removeCategories.png" alt="test1" />
+<img src="{prepend: site.url}/images/2022/removeCategories.png" alt="test1" />
 
 
-![test2](site.url/images/2022/removeCategories.png)
+![test2](/images/2022/removeCategories.png)
 
 Below is some helpful source doco as part of the default page but I'll leave in for interest:
 

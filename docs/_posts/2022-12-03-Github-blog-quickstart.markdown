@@ -11,6 +11,7 @@ As it took me quite a bit of time to set this all up (best part of a weekend), I
 I followed the [quickstart-guide-on-Github], so most of the content will be similar, but with a few twists to accomodate my own setup.
 
 I run Windows 10, so to use the linux-based commands I ended up setting up an Ubuntu Dev container in my VSCode, guide here: [VS-Code-Container-Guide]
+
 The DockerFile image I used is modified from [Docker-Image-Source]
 
 I first created a repository in Github named `username.github.io`
@@ -30,12 +31,15 @@ which gave me the output `New jekyll site installed in /home/john/workspace/rawp
 Finally, I modified the configuration GemFile with `vi GemFile` (requires vi to be installed)
 
 First I commented out `gem "jekyll", "~> 4.3.1"`
+
 Then I modified the line starting `gem "github-pages"` to `gem "github-pages", "~> 227", group: :jekyll_plugins`
+
 Then ran `bundle install`
  
 And that was it!
 
-New posts are written in markdown under the `_posts` folder and follow the naming format - `YEAR-MONTH-DAY-title.MARKUP`
+New posts are written in markdown under the `_posts` folder and follow the naming format
+`YEAR-MONTH-DAY-title.MARKUP`
 
 Where `YEAR` is a four-digit number, `MONTH` and `DAY` are both two-digit numbers, and `MARKUP` is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.
 
@@ -44,11 +48,12 @@ eg.
 `https://rawpatty.github.io/jekyll/update/2022/12/03/First-page-example.html`
 
 Things I want to learn next are how to add pictures, categorise articles into their own repos, and how to simplify the URL so it removes the `jekyll/update` path
+
 Stay Tuned (and hopefully I don't procrastinate this)
 
 Update: Turns out the URL is generated from the categories, so as above I would have two categories of jekyll and update - by removing the categories section, I was able to make the blog post directly link appear without categories appearing in the URL.
 
-![image](/images/2022/removeCategories.png)
+![image](/../images/2022/removeCategories.png)
 
 
 Below is some helpful source doco as part of the default page but I'll leave in for interest:

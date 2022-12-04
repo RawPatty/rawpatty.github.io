@@ -32,7 +32,9 @@ Finally, I modified the configuration GemFile with `vi GemFile` (requires vi to 
 
 First I commented out `gem "jekyll", "~> 4.3.1"`
 
-Then I modified the line starting `gem "github-pages"` to `gem "github-pages", "~> 227", group: :jekyll_plugins`
+Then I modified the line starting `gem "github-pages"` to 
+
+`gem "github-pages", "~> 227", group: :jekyll_plugins`
 
 Then ran `bundle install`
  

@@ -2,7 +2,7 @@
 layout: post
 title:  "Github.io Blog Quickstart for Windows 10"
 date:   2022-12-03 08:47:29 +0000
-categories: Blog, jekyll
+categories: Blog jekyll
 ---
 Having written a few blog posts in the past on my medium blog, I was inspired to move to blogging on Github pages like a "real" developer now that I've gotten comfortable writing posts.
 

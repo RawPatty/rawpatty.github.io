@@ -5,13 +5,15 @@ date:   2022-09-14 08:47:29 +0000
 ---
 Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here's a rundown of the permissions you'll need.
 
-![AzureDevops1](/images/2022/AzureDevops1.png)
-*Ever wondered what happens behind the scenes when you select the automatic option when creating a new service connection in Azure DevOps?*
+|![AzureDevops1](/images/2022/AzureDevops1.png){: .center-image } |
+| :--: |
+|*Ever wondered what happens behind the scenes when you select the automatic option when creating a new service connection in Azure DevOps?*|
 
 ## What is happening when you set this up?
 
-![AzureDevops2](/images/2022/AzureDevops2.png)
-*We'll cover the case of subscription - but the principles are the same*
+| ![AzureDevops2](/images/2022/AzureDevops2.png){: .center-image } |
+| :--: |
+| *We'll cover the case of subscription - but the principles are the same* |
 
 The objective of a service connection is to allow your Azure DevOps environment to interact with your Azure resources.
 
@@ -36,6 +38,6 @@ Simply fill in your desired scope of subscription and enter the application ID u
 
 The service principal key will need to be manually created, you can reach the page via Azure AD -> App Registrations -> Certificates & Secrets -> Client Secrets. Note that creating a key here will show you the value one time.
 
-![AzureDevops3](/images/2022/AzureDevops3.png)
+![AzureDevops3](/images/2022/AzureDevops3.png){: .center-image }
 
 Remember to renew and update these keys when they expire!

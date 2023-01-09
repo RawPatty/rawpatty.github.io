@@ -12,7 +12,6 @@ Are you experiencing errors when trying to set up new service connections in you
 ## What is happening when you set this up?
 
 | ![AzureDevops2](/images/2022/AzureDevops2.png) |
-| :--: |
 | *We'll cover the case of subscription - but the principles are the same* |
 
 The objective of a service connection is to allow your Azure DevOps environment to interact with your Azure resources.

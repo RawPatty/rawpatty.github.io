@@ -27,15 +27,17 @@ Instead, the reservation service sits under the tenant as `providers/Microsoft.c
 
 ## Permissions required
 
-As the reservation resource is under the tenant instead of any subscriptions, you will need to be a global administrator and elevate user access administrator privileges to assign these roles, a global administrator can elevate the User Access Administrator through `Azure Active Directory -> properties` and select "Yes" for `"Access management for Azure resources"`
+As the reservation resource is under the tenant instead of any subscriptions, you will need to be a global administrator and elevate user access administrator privileges to assign these roles, a global administrator can elevate the User Access Administrator through
+
+`Azure Active Directory -> properties` and select "Yes" for `"Access management for Azure resources"`
 
 ## Assigning the roles
 
 In what is a bit of a confusing twist, reservation roles are actually directory roles, but are instead assigned under
-
 `Reservations -> role assignment`
 
-instead of `Azure Active Directory -> roles and administrators`
+instead of
+`Azure Active Directory -> roles and administrators`
 
 Hoping this will eventually be unified.
 
@@ -52,8 +54,11 @@ Working around the problem, I was able to create a Privileged Access Group that 
 As usual, any enterprise administrator may assign permissions to individual reservation orders to users, and the user will have visibility on that individual item, but these new roles allow for control over a wider scope.
 
 ## Microsoft Documentation
+
 [Permissions to view and manage Azure reservations]
+
 [Buying Reservations]
+
 [EA Administration guide]
 
 [Permissions to view and manage Azure reservations]: https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/view-reservations

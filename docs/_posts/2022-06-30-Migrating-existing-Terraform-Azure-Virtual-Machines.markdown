@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Migrating existing Terraform-managed Azure Virtual Machines that aren’t in an availability zone to an availability zone"
-date:   2023-01-08 08:47:29 +0000
+date:   2022-06-30 08:47:29 +0000
 ---
 Moving this from my medium blog
 

@@ -7,11 +7,17 @@ Moving this from my medium blog
 
 Hi team, I wanted to write about a particular script I write over Christmas that helped to cut down the manual work required to move a whole raft of virtual machines to availability zones.
 
-Situation: We had multiple frontend VMs in a load-balanced configuration but not in availability zones.
+## Situation
 
-Task: Migrate these VMs across the Availability Zones in the Azure Region to take advantage of the (basically free - since we're already paying for the VMs) zonal redundancy
+We had multiple frontend VMs in a load-balanced configuration but not in availability zones.
 
-The problem: The Azure Resource Mover only supports cross-regional resource movement. Within a particular Azure region, only AZ-AZ regional migration is supported via Site Recovery. There is no native support for non-AZ to AZ VM migrations.
+## Task
+
+Migrate these VMs across the Availability Zones in the Azure Region to take advantage of the (basically free - since we're already paying for the VMs) zonal redundancy
+
+## The problem
+
+The Azure Resource Mover only supports cross-regional resource movement. Within a particular Azure region, only AZ-AZ regional migration is supported via Site Recovery. There is no native support for non-AZ to AZ VM migrations.
 
 Your company also uses basic Terraform modules to manage the configuration of the VMs, which means a lot of post-migration Terraform changes if we follow the idea of snapshotting and recreating the resource as detailed in [kpantos's] blog post.
 

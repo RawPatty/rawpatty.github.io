@@ -5,8 +5,7 @@ date:   2022-09-14 08:47:29 +0000
 ---
 Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here's a rundown of the permissions you'll need.
 
-|![AzureDevops1](/images/2022/AzureDevops1.png) |
-| :--: |
+| ![AzureDevops1](/images/2022/AzureDevops1.png) |
 |*Ever wondered what happens behind the scenes when you select the automatic option when creating a new service connection in Azure DevOps?*|
 
 ## What is happening when you set this up?
@@ -26,8 +25,6 @@ To fulfill these tasks you will need the following permissions:
 
 1. To create a service principal, you'll need permissions over the directory. Users who need permissions could be assigned the Azure AD Role of Application Developer or Application Administrator
 2. To grant contributor permissions to the desired scope, you will need to have "reader" permissions on the subscription to navigate the subscription filter and "Owner" permissions to grant a role over the desired scope. You can also choose no resource group which will assign the service principal "contributor" role at the subscription level)
-
----
 
 ## but how does the "manual" option work?
 

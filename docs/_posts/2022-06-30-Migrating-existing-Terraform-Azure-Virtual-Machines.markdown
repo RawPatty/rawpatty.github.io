@@ -14,6 +14,7 @@ Task: Migrate these VMs across the Availability Zones in the Azure Region to tak
 The problem: The Azure Resource Mover only supports cross-regional resource movement. Within a particular Azure region, only AZ-AZ regional migration is supported via Site Recovery. There is no native support for non-AZ to AZ VM migrations.
 
 Your company also uses basic Terraform modules to manage the configuration of the VMs, which means a lot of post-migration Terraform changes if we follow the idea of snapshotting and recreating the resource as detailed in [kpantos's] blog post.
+
 Your company also uses Terraform, specifically the azurerm_linux_virtual_machine module which does not support attaching OS disks.
 To minimize the amount of variable refactoring in Terraform, I've written a PowerShell script that will perform the following tasks:
 

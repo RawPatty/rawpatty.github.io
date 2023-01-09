@@ -21,7 +21,9 @@ In the source server, add the admin account of the target server with DB owner p
 
 Master database
 
-`CREATE LOGIN sourceadmin (replace this with your target’s admin account name) WITH PASSWORD = ‘**********’;` (Choose a password)
+{% highlight ruby %}
+CREATE LOGIN sourceadmin (replace this with your target’s admin account name) WITH PASSWORD = ‘**********’;` (Choose a password)
+{% endhighlight %}
 
 On the target database:
 

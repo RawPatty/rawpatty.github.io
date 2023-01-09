@@ -9,4 +9,4 @@ Capturing Kubernetes agent YAML in a separate file
 Capturing desired PowerShell code in a file and referencing that for the container to execute
 Creation of a PowerShell Secret object to provide the Connect-AzAccount command - pulling from environmental variables etc.
 
-{% gist 08f93b0ff9fcccf2de36aa4007c5fcdf/raw/9e1a7b18378d10bae6e49fd6a4583fbd92eaa421/JenkinsFile.groovy %}
+{% gist 08f93b0ff9fcccf2de36aa4007c5fcdf %}

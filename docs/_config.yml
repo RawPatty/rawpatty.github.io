@@ -21,10 +21,10 @@
 title: John Sun's notes
 email: johnsunjohn@msn.com
 description: >- # this means to ignore newlines until "baseurl:"
-  A collection of notes from 5+ years working across Microsoft technologies
+  A collection of notes from experience working across Microsoft technologies
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://rawpatty.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: rawpatty
+#twitter_username: rawpatty
 github_username:  rawpatty
 
 # Build settings

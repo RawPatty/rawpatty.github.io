@@ -17,7 +17,7 @@ There are three granular roles to help manage access to Azure reservations:
 - Reservation Reader - Directory role assigned at Reservation -> Role Assignment
 - Reservation Purchaser - Resource RBAC Permission assigned at resource group, subscription, or management group levels
 
-The role of Reader and Administrator are notable as they allow a user to gain visibility and control over all existing reservations tied to the tenant, instead of needing to grant access to each order retroactively.
+The role of `Reservation Reader` and `Reservation Administrator` are notable as they allow a user to gain visibility and control over all existing reservations tied to the tenant, instead of needing to grant access to each reservation order retroactively.
 
 ## Understanding where reservations sit within Azure
 
@@ -27,7 +27,7 @@ Instead, the reservation service sits under the tenant as `providers/Microsoft.c
 
 ## Permissions required
 
-As the reservation resource is under the tenant instead of any subscriptions, you will need to be a global administrator and elevate user access administrator privileges to assign these roles, a global administrator can elevate the User Access Administrator through
+As the reservation resource is under the tenant instead of any subscriptions, you will need to be a `Global Administrator` and elevate `User Access Administrator` privileges to assign these roles, this can be done via:
 
 `Azure Active Directory -> properties` and select "Yes" for `"Access management for Azure resources"`
 
@@ -43,7 +43,7 @@ instead of
 
 Hoping this will eventually be unified.
 
-It looks like resource assignments to mangement groups, subscriptions, and resource groups can assign the Reservation Purchaser role, it looks like the purchaser role is resource based and can be assigned by an Owner (so as to puchase scoped reservations), while the Administrator and Reader roles are directory roles only assignable currently under the Reservation tab by a global administrator with User Access Administrator elevation activated.
+`Owners` can assign to mangement groups, subscriptions, and resource groups the `Reservation Purchaser role`, I believe this is to make scoped reservations), while the `Reservation Administrator` and `Reservation Reader` roles are directory roles only assignable currently under the Reservation tab by a `Global Administrator` with `User Access Administrator` elevation activated.
 
 ## How about Privileged Identity Management (PIM)?
 
@@ -53,7 +53,7 @@ Working around the problem, I was able to create a Privileged Access Group that 
 
 ## Existing Reservation Orders
 
-As usual, any enterprise administrator may assign permissions to individual reservation orders to users, and the user will have visibility on that individual item, but these new roles allow for control over a wider scope.
+As usual, any `Enterprise Administrator` may assign permissions to individual reservation orders to users, and the user will have visibility on that individual item, but these new roles allow for control over a wider scope.
 
 ## Microsoft Documentation
 

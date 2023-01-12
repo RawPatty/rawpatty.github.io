@@ -15,7 +15,7 @@ There are three granular roles to help manage access to Azure reservations:
 
 - Reservation Administrator - Directory role assigned at Reservation -> Role Assignment
 - Reservation Reader - Directory role assigned at Reservation -> Role Assignment
-- Reservation Purchaser - Resource RBAC Permission assigned at resource group, subscription, or management group levels 
+- Reservation Purchaser - Resource RBAC Permission assigned at resource group, subscription, or management group levels
 
 The role of Reader and Administrator are notable as they allow a user to gain visibility and control over all existing reservations tied to the tenant, instead of needing to grant access to each order retroactively.
 
@@ -23,13 +23,15 @@ The role of Reader and Administrator are notable as they allow a user to gain vi
 
 Reservations are a bit of a strange resource type, they don't follow the usual resource flow of sitting under a subscription.
 
-Instead, the reservation service sits under the tenant as `providers/Microsoft.capacity` and do not inherit permissions from a subscription, as they don't sit under a subscription, RBAC roles of "Owner" or "Contributor" will not allow you to manage all reservations - though Owners for a subscription can manage reservations for that particular subscription for which they are an Owner - the above roles will unlock the ability to see across all reservations within the tenant once assigned.
+Instead, the reservation service sits under the tenant as `providers/Microsoft.capacity` and do not inherit permissions from a subscription, as they don't sit under a subscription, RBAC roles of `Owner` or `Contributor` will not allow you to manage all reservations - though `Owners` for a subscription can manage reservations for that particular subscription for which they are an `Owner` - the above roles will unlock the ability to see across all reservations within the tenant once assigned.
 
 ## Permissions required
 
 As the reservation resource is under the tenant instead of any subscriptions, you will need to be a global administrator and elevate user access administrator privileges to assign these roles, a global administrator can elevate the User Access Administrator through
 
 `Azure Active Directory -> properties` and select "Yes" for `"Access management for Azure resources"`
+
+As `Reservation Purchaser` is a resource level role, it can be assigned by an `Owner` of the resource group, subscription, or management group
 
 ## Assigning the roles
 

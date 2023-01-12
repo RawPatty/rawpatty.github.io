@@ -15,7 +15,7 @@ There are three granular roles to help manage access to Azure reservations:
 
 - Reservation Administrator - Directory role assigned at Reservation -> Role Assignment
 - Reservation Reader - Directory role assigned at Reservation -> Role Assignment
-- Reservation Purchaser - Resource RBAC Permission assigned at subscription level or higher
+- Reservation Purchaser - Resource RBAC Permission assigned at resource group, subscription, or management group levels 
 
 The role of Reader and Administrator are notable as they allow a user to gain visibility and control over all existing reservations tied to the tenant, instead of needing to grant access to each order retroactively.
 
@@ -41,7 +41,7 @@ instead of
 
 Hoping this will eventually be unified.
 
-It looks like resource assignments to mangement groups at most can assign the Reservation Purchaser role, it would follow that the purchaser role is resource based and can be assigned at the subscription level (or above) by an Owner, while the Administrator and Reader roles are directory roles only assignable currently under the Reservation tab by a global administrator with User Access Administrator elevation activated.
+It looks like resource assignments to mangement groups, subscriptions, and resource groups can assign the Reservation Purchaser role, it looks like the purchaser role is resource based and can be assigned by an Owner (so as to puchase scoped reservations), while the Administrator and Reader roles are directory roles only assignable currently under the Reservation tab by a global administrator with User Access Administrator elevation activated.
 
 ## How about Privileged Identity Management (PIM)?
 

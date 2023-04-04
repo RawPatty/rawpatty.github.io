@@ -18,12 +18,6 @@ For Azure Backup vaults, there are 3 levels of immutability a vault can have
 
 This service is offered for both Azure Recovery Services Vaults and Azure Backup Vaults, enabling immutability prevents the following actions:
 
-| Operation Type                        Description                                                                                                                                                       |
-|----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Stop protection with delete data       | A protected item can't have its recovery points deleted before their respective expiry date. However, you can still stop protection of the instances while retaining data forever or until their expiry. (Same for Backup Vault)|
-| Modify backup policy to reduce retention| Any actions that reduce the retention period in a backup policy are disallowed on Immutable vault. However, you can make policy changes that result in the increase of retention. You can also make changes to the schedule of a backup policy. |
-| Change backup policy to reduce retention| Any attempt to replace a backup policy associated with a backup item with another policy with retention lower than the existing one is blocked. However, you can replace a policy with the one that has higher retention. |
-
 ## Why would I want immutability?
 
 This feature within Azure Backup is important for data protection and compliance, as it protects against accidental or malicious deletion of backups or tampering with backup policies that could result in a reduction of backups.
@@ -54,7 +48,6 @@ Within your Recovery Services Vault (1), navigate to properties (2), under "Immu
 ## Microsoft Documentation
 
 [Immutable vault for Azure Backup]
-
 
 [Immutable vault for Azure Backup]: https://learn.microsoft.com/en-us/azure/backup/backup-azure-immutable-vault-concept
 [General Availability]: https://azure.microsoft.com/en-au/updates/azure-backup-immutable-vaults-ga/

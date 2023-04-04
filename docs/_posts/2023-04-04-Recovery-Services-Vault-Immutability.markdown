@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  Immutable Vaults for Azure Backup "
+title:  "Immutable Vaults for Azure Backup"
 date:   2023-04-04 23:40:00 +0000
 ---
 Feature announced for [General Availability] in March 13, 2023

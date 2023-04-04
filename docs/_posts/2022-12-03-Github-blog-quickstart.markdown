@@ -67,6 +67,8 @@ Eg.
 
 On the last item, there is a plugin that allows for the automation of this [jekyll-postfiles] , but the plugin is not supported to be used with Github Pages
 
+Edit: Oh yeah I also wanted to add that you can use the command `bundle exec jekyll serve` to locally serve the website for debugging purposes :) Enjoy!
+
 Below is some helpful source doco as part of the default page but I'll leave in for interest:
 
 

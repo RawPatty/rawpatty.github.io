@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Recovery-Services-Vault-Immutability"
-date:   2023-04-04 23:40:00 +0000
+title:  "Recovery Services Vault Immutability"
+date:   2023-04-04 11:40:00 +0000
 ---
 Feature announced for [General Availability] in March 13, 2023
 
@@ -29,7 +29,7 @@ By enabling immutability, backups are made read-only (cannot be deleted) and can
 Previously there was an irreversable security settings control which would email all subscription administrators whenever backup data was to be deleted, or when the vault was to be deleted, these would enter a soft-delete state for period of time with alerting.
 I've had a look around and it looks like these have now been separated out under "Enable soft delete and security settings for hybrid workloads", although it looks like this checkbox can now be toggled off, the immutability control looks like it's been separated out for more granular control.
 
-![Soft Delete Controls](images/2023/Soft Delete Controls.png)
+![Soft Delete Controls](/images/2023/Soft Delete Controls.png)
 
 ## Approach to adoption
 

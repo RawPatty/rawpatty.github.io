@@ -1,9 +1,11 @@
 ---
 layout: post
-title:  "Immutable Vaults for Azure Backup"
+title:  "Recovery-Services-Vault-Immutability"
 date:   2023-04-04 23:40:00 +0000
 ---
 Feature announced for [General Availability] in March 13, 2023
+
+I'll just be covering this for the Recovery Services Vault service as it's what most enterprises would use to secure production data.
 
 ## What is immutability?
 
@@ -18,7 +20,7 @@ This service is offered for both Azure Recovery Services Vaults and Azure Backup
 
 | Operation Type                        Description                                                                                                                                                       |
 |----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Stop protection with delete data       | A protected item can't have its recovery points deleted before their respective expiry date. However, you can still stop protection of the instances while retaining data forever or until their expiry. |
+| Stop protection with delete data       | A protected item can't have its recovery points deleted before their respective expiry date. However, you can still stop protection of the instances while retaining data forever or until their expiry. (Same for Backup Vault)|
 | Modify backup policy to reduce retention| Any actions that reduce the retention period in a backup policy are disallowed on Immutable vault. However, you can make policy changes that result in the increase of retention. You can also make changes to the schedule of a backup policy. |
 | Change backup policy to reduce retention| Any attempt to replace a backup policy associated with a backup item with another policy with retention lower than the existing one is blocked. However, you can replace a policy with the one that has higher retention. |
 
@@ -42,8 +44,6 @@ As the enabled and locked form is actually what is immutable, this would be the 
 However as this state restricts our abillity to reduce and modify vault policy to be shorter, I would recommend enabling vault immutability (without locking) for a period of time until backup policies have been finalised before locking.
 
 ## How do I to set this control?
-
-I'll just be covering this for the Recovery Services Vault object as it's what most enterprises would use to secure production data.
 
 You will first need `Contributor` or above permissions to the resource or the immutablility controls will not show
 

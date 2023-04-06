@@ -38,6 +38,8 @@ Previously there was an irreversable security settings control which would email
 
 I've had a look around and it looks like these have now been separated out under "Enable soft delete and security settings for hybrid workloads", although it looks like this checkbox can now be toggled off, the immutability control looks like it's been separated out for more granular control.
 
+Keep in mind this is not vault immutability! While it does help prevent your data from being deleted, this does not seem to prevent the switching of policies or reducing the retention period of existing policies that are used by a VM.
+
 ![Soft Delete Controls](/images/2023/Soft Delete Controls.png)
 
 The previous controls around security features:

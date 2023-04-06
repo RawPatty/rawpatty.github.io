@@ -42,7 +42,7 @@ I've had a look around and it looks like these have now been separated out under
 
 The previous controls around security features:
 
-![oldsecuritysettings](images/2023/oldsecuritysettings.png)
+![oldsecuritysettings](/images/2023/oldsecuritysettings.png)
 
 ## Approach to adoption
 

@@ -34,13 +34,13 @@ By enabling immutability, backups are made read-only (cannot be deleted) and can
 
 ## What about my previously set recovery services vault security controls?
 
-Previously there was an irreversable security settings control which would email all subscription administrators whenever backup data was to be deleted, or when the vault was to be deleted, these would enter a soft-delete state for period of time with alerting.
+Previously there was an irreversable security settings control which would email all subscription administrators whenever backup data was to be deleted, these would enter a soft-delete state for period of time with alerting. As a vault could not be removed before all backup data inside was removed, this essentially prevented the vault from deletion.
 
 I've had a look around and it looks like these have now been separated out under "Enable soft delete and security settings for hybrid workloads", although it looks like this checkbox can now be toggled off, the immutability control looks like it's been separated out for more granular control.
 
 ![Soft Delete Controls](/images/2023/Soft Delete Controls.png)
 
-The previous controls around security settings
+The previous controls around security features:
 
 ![Previous Control Page](images/2023/oldsecuritysettings.png)
 

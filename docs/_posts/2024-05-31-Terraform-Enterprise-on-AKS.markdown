@@ -22,8 +22,8 @@ Before getting started you will need a few things
 # Networking 
 
 For most of these Azure resources it's quite straightforward - the only thing to note is that running all of these resources with a private link will require the associated zone and appropriate DNS fowarders set up (Depending on where how your DNS is resolved)
+[Azure Private Endpoint DNS Zone value reference]
 
-[Azure Private Endpoint DNS Zone value reference] https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns
 For this deployment you will need private DNS zones set up for 
 
 - Azure Database for PostgresSQL flexible server (privatelink.postgres.database.azure.com)
@@ -124,3 +124,4 @@ Since I found it quite difficult to get all the right values, I'm supplying my o
 [Configuration Reference]: https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/configuration
 [Sample Values File]: https://gist.github.com/RawPatty/ec880f0962f534ea5866511f208ab4a3
 [Hashicorp Terraform Enterprise Github Page]: https://github.com/hashicorp/terraform-enterprise-helm/blob/main/values.yaml 
+[Azure Private Endpoint DNS Zone value reference]: https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns

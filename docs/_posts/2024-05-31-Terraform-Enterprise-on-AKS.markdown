@@ -3,7 +3,8 @@ layout: post
 title:  "Setting up Terraform Enterprise in a new private AKS cluster with the new Flexible Deployment Option"
 date:   2024-05-31 11:40:00 +0000
 ---
-After a long hiatus I'm back with another writeup.
+After a long hiatus I'm back with another writeup!
+
 Recently I went through the journey of setting up Terraform Enterprise for my organisation - as there was bit of a lack of documentation on the step by step - Hashicorp is writing the documentation from the point of view that you already have the private AKS cluster running in your organisation, I decided to write a guide that captures the steps required to set this up from scratch.
 
 I'll be covering the private AKS Active-Active setup using the flexible deployment option
@@ -29,7 +30,6 @@ For this deployment you will need private DNS zones set up for
 - Azure Kubernetes services (privatelink.YOURREGION.azmk8s.io)
 - Azure Cache for Redis (privatelink.redis.cache.windows.net)
 - Azure Storage Account - Blob storage service (privatelink.blob.core.windows.net)
-
 - Create a virtual network (if required to peer back to a hub, ensure the address space does not overlap your peered network)
 - Create subnets - I set up three which I think would be the minimum, 
 (/26 for AKS cluster, /28 for postgressql, /27 for private endpoints, apply the NSG and Route tables to the subnets)
@@ -61,10 +61,11 @@ az aks create \
 # Configuration 
 - Initialize the AKS cluster by adding in the desired node pool configurations, update schedules, diagnostics, and namespaces that weren't included in your script
 - Initialize the PGSQL Database 
-In “Server Parameters” on the Azure portal, find azure.extension and from the dropdown, add `CITEXT`, `HSTORE`, and `UUID-OSSP` extensions, click save.
+In `Server Parameters` on the Azure portal, find azure.extension and from the dropdown, add `CITEXT`, `HSTORE`, and `UUID-OSSP` extensions, click save.
 
 Connecting to the PGSQL instance with the default account in a terminal
-Create the new database - In my case I called it “terraform_enterprise”
+Create the new database - In my case I called it `terraform_enterprise`
+
 Grant access for the terraform user account to have full control over schemas
 {% highlight ruby %}
 GRANT ALL PRIVILEGES ON DATABASE "DB_Name" TO "TF_Username";
@@ -97,8 +98,9 @@ Create an secret within your AKS for accessing the image
 kubectl create secret docker-registry terraform-enterprise --docker-server=<DOCKER_REGISTRY_URL> --docker-username=<DOCKER_REGISTRY_USERNAME> --docker-password=<DOCKER_REGISTRY_PASSWORD>  -n <TFE_NAMESPACE>
 {% endhighlight %}
 
-A copy of the values file can be obtained at https://github.com/hashicorp/terraform-enterprise-helm/blob/main/values.yaml 
-[Configuration Reference]: https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/configuration
+A copy of the values file can be obtained at [Hashicorp Terraform Enterprise Github Page]
+
+Reference for the values can be found at [Configuration Reference]
 
 Once that is filled out you are ready to kick off the install!
 
@@ -110,11 +112,15 @@ helm install terraform-enterprise hashicorp/terraform-enterprise --namespace <YO
 # Example Values file
 
 Since I found it quite difficult to get all the right values, I'm supplying my own example one, hope it helps!
-[Sample Values File]: https://gist.github.com/RawPatty/ec880f0962f534ea5866511f208ab4a3
+
+[Sample Values File]
 
 
+## Reference Documentation
 
-## Microsoft Documentation
+[Hashicorp Terraform Enterprise FDO Kubernetes install guide]
 
 [Hashicorp Terraform Enterprise FDO Kubernetes install guide]: https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/kubernetes/install
-[General Availability]: https://azure.microsoft.com/en-au/updates/azure-backup-immutable-vaults-ga/
+[Configuration Reference]: https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/configuration
+[Sample Values File]: https://gist.github.com/RawPatty/ec880f0962f534ea5866511f208ab4a3
+[Hashicorp Terraform Enterprise Github Page]: https://github.com/hashicorp/terraform-enterprise-helm/blob/main/values.yaml 

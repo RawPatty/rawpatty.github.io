@@ -19,7 +19,7 @@ Before getting started you will need a few things
 
 
 ## Resouce Deployment
-# Networking 
+# Networking Setup
 
 For most of these Azure resources it's quite straightforward - the only thing to note is that running all of these resources with a private link will require the associated zone and appropriate DNS fowarders set up (Depending on where how your DNS is resolved)
 [Azure Private Endpoint DNS Zone value reference]
@@ -30,6 +30,9 @@ For this deployment you will need private DNS zones set up for
 - Azure Kubernetes services (privatelink.YOURREGION.azmk8s.io)
 - Azure Cache for Redis (privatelink.redis.cache.windows.net)
 - Azure Storage Account - Blob storage service (privatelink.blob.core.windows.net)
+
+Now the zones are created, we can work on the VNet and subnets
+
 - Create a virtual network (if required to peer back to a hub, ensure the address space does not overlap your peered network)
 - Create subnets - I set up three which I think would be the minimum, 
 (/26 for AKS cluster, /28 for postgressql, /27 for private endpoints, apply the NSG and Route tables to the subnets)
@@ -41,9 +44,9 @@ For this deployment you will need private DNS zones set up for
 
 # AKS Private cluster 
 - Create user assigned managed identity
-- Assign network contributor role on virtual network
-- Assign Private DNS Zone Contributor on the privatelink.YOURZONE.azmk8s.io zone (Replace westus2 with desired region)
-- Create Private AKS cluster with following az cli command exampl
+    - Assign network contributor role on virtual network
+    - Assign Private DNS Zone Contributor on the privatelink.YOURZONE.azmk8s.io zone (Replace westus2 with desired region)
+- Create Private AKS cluster with following `az cli` command exampl
 {% highlight ruby %}
 az aks create \
     --name "AKS Cluster Name" \

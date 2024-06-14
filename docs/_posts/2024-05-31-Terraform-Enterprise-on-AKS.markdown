@@ -67,9 +67,10 @@ az aks create \
 In `Server Parameters` on the Azure portal, find azure.extension and from the dropdown, add `CITEXT`, `HSTORE`, and `UUID-OSSP` extensions, click save.
 
 Connecting to the PGSQL instance with the default account in a terminal
-Create the new database - In my case I called it `terraform_enterprise`
 
-Grant access for the terraform user account to have full control over schemas
+- Create the new database - I called mine `terraform_enterprise`
+
+- Grant access for the terraform user account to have full control over schemas
 {% highlight ruby %}
 GRANT ALL PRIVILEGES ON DATABASE "DB_Name" TO "TF_Username";
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "TF_Username";
@@ -80,32 +81,33 @@ GRANT ALL ON SCHEMA public TO "TF_Username";
 # Deploy Terraform
 In a local terminal, you will need to autheticate and grab the Terraform Enterprise Image. 
 
-
-Log in to the Terraform Enterprise container image registry.
+- Log in to the Terraform Enterprise container image registry.
 The `UserName` is `Terraform` and password is your license file value. (The below script will save you from entering it manually)
 
 {% highlight ruby %}
 cat <PATH_TO_HASHICORP_LICENSE_FILE> |  docker login --username terraform images.releases.hashicorp.com --password-stdin
 {% endhighlight %}
 
-Pull the Terraform Enterprise image from the registry as a test.
+- Pull the Terraform Enterprise image from the registry as a test.
 
 {% highlight ruby %}
 docker pull images.releases.hashicorp.com/hashicorp/terraform-enterprise:<vYYYYMM-#>
 {% endhighlight %}
 
-Create your AKS namespace 
-Create an secret within your AKS for accessing the image 
+- Create your AKS namespace 
+- Create an secret within your AKS for accessing the image 
 
 {% highlight ruby %}
 kubectl create secret docker-registry terraform-enterprise --docker-server=<DOCKER_REGISTRY_URL> --docker-username=<DOCKER_REGISTRY_USERNAME> --docker-password=<DOCKER_REGISTRY_PASSWORD>  -n <TFE_NAMESPACE>
 {% endhighlight %}
 
+- Fill out the values file
 A copy of the values file can be obtained at [Hashicorp Terraform Enterprise Github Page]
 
 Reference for the values can be found at [Configuration Reference]
 
-Once that is filled out you are ready to kick off the install!
+- Kick off the install
+Finally, it's time to deploy Terraform Enterprise on AKS!
 
 {% highlight ruby %}
 helm install terraform-enterprise hashicorp/terraform-enterprise --namespace <YOUR_NAMESPACE> -f "Pathtovalues.yaml"

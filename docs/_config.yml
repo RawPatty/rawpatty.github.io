@@ -27,6 +27,11 @@ url: "https://rawpatty.github.io/" # the base hostname & protocol for your site,
 #twitter_username: rawpatty
 github_username:  rawpatty
 
+header_pages:
+ - about.md
+ - blog.md
+ - contact.md
+
 # Build settings
 theme: minima
 plugins:

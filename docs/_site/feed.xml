@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-09-14T17:47:31-07:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">John Sun’s notes</title><subtitle>A collection of notes from experience working across Microsoft technologies</subtitle><entry><title type="html">Setting up Terraform Enterprise in a new private AKS cluster with the new Flexible Deployment Option</title><link href="http://localhost:4000/2024/05/31/Terraform-Enterprise-on-AKS.html" rel="alternate" type="text/html" title="Setting up Terraform Enterprise in a new private AKS cluster with the new Flexible Deployment Option" /><published>2024-05-31T04:40:00-07:00</published><updated>2024-05-31T04:40:00-07:00</updated><id>http://localhost:4000/2024/05/31/Terraform-Enterprise-on-AKS</id><content type="html" xml:base="http://localhost:4000/2024/05/31/Terraform-Enterprise-on-AKS.html"><![CDATA[<p>After a long hiatus I’m back with another writeup!</p>
+
+<p>Recently I went through the journey of setting up Terraform Enterprise for my organisation - as there was bit of a lack of documentation on the step by step - Hashicorp is writing the documentation from the point of view that you already have the private AKS cluster running in your organisation, I decided to write a guide that captures the steps required to set this up from scratch.</p>
+
+<p>I’ll be covering the private AKS Active-Active setup using the flexible deployment option</p>
+
+<h2 id="prerequisties">Prerequisties</h2>
+
+<p>Before getting started you will need a few things</p>
+
+<ul>
+  <li>A Terraform Enterprise license</li>
+  <li>Access to a virtual network with some subnets</li>
+  <li>Contributor access to an Azure subscription</li>
+</ul>
+
+<h2 id="resouce-deployment">Resouce Deployment</h2>
+<h1 id="networking-setup">Networking Setup</h1>
+
+<p>For most of these Azure resources it’s quite straightforward - the only thing to note is that running all of these resources with a private link will require the associated zone and appropriate DNS fowarders set up (Depending on where how your DNS is resolved)
+<a href="https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns">Azure Private Endpoint DNS Zone value reference</a></p>
+
+<p>For this deployment you will need private DNS zones set up for</p>
+
+<ul>
+  <li>Azure Database for PostgresSQL flexible server (privatelink.postgres.database.azure.com)</li>
+  <li>Azure Kubernetes services (privatelink.YOURREGION.azmk8s.io)</li>
+  <li>Azure Cache for Redis (privatelink.redis.cache.windows.net)</li>
+  <li>Azure Storage Account - Blob storage service (privatelink.blob.core.windows.net)</li>
+</ul>
+
+<p>Now the zones are created, we can work on the VNet and subnets</p>
+
+<ul>
+  <li>Create a virtual network (if required to peer back to a hub, ensure the address space does not overlap your peered network)</li>
+  <li>Create subnets - I set up three which I think would be the minimum, 
+(/26 for AKS cluster, /28 for postgressql, /27 for private endpoints, apply the NSG and Route tables to the subnets)</li>
+</ul>
+
+<h1 id="infrastructure">Infrastructure</h1>
+<ul>
+  <li>Create Postgres SQL Flexible server, deployed into the subnet (This creates a subnet delegation, which means the subnet cannot be used for other services as it is now managed by Azure)</li>
+  <li>Create Azure Cache for Redis (with private endpoint)</li>
+  <li>Create Storage account (with private endpoint) and blob container</li>
+</ul>
+
+<h1 id="aks-private-cluster">AKS Private cluster</h1>
+<ul>
+  <li>Create user assigned managed identity
+    <ul>
+      <li>Assign network contributor role on virtual network</li>
+      <li>Assign Private DNS Zone Contributor on the privatelink.YOURZONE.azmk8s.io zone (Replace westus2 with desired region)</li>
+    </ul>
+  </li>
+  <li>Create Private AKS cluster with following <code class="language-plaintext highlighter-rouge">az cli</code> command exampl</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">az</span> <span class="n">aks</span> <span class="n">create</span> <span class="p">\</span>
+    <span class="o">--</span><span class="nb">name</span> <span class="s2">"AKS Cluster Name"</span> <span class="p">\</span>
+    <span class="o">--</span><span class="n">resource</span><span class="o">-</span><span class="n">group</span> <span class="s2">"Resource Group"</span> <span class="p">\</span>
+    <span class="o">--</span><span class="nb">load</span><span class="o">-</span><span class="n">balancer</span><span class="o">-</span><span class="n">sku</span> <span class="n">standard</span> <span class="p">\</span>
+    <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="kp">private</span><span class="o">-</span><span class="n">cluster</span> <span class="p">\</span>
+    <span class="o">--</span><span class="n">assign</span><span class="o">-</span><span class="n">identity</span> <span class="s2">"Your user assigned managed identity ResourceID"</span> <span class="p">\</span>
+    <span class="o">--</span><span class="kp">private</span><span class="o">-</span><span class="n">dns</span><span class="o">-</span><span class="n">zone</span> <span class="s2">"Your Private DNS zone ResourceID"</span> <span class="p">\</span>
+    <span class="o">--</span><span class="n">generate</span><span class="o">-</span><span class="n">ssh</span><span class="o">-</span><span class="n">keys</span> <span class="p">\</span>
+    <span class="o">--</span><span class="n">vnet</span><span class="o">-</span><span class="n">subnet</span><span class="o">-</span><span class="nb">id</span> <span class="s2">"AKS subnet resourceID"</span> <span class="p">\</span>
+    <span class="o">--</span><span class="n">zones</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="p">\</span>
+    <span class="o">--</span><span class="n">node</span><span class="o">-</span><span class="n">resource</span><span class="o">-</span><span class="n">group</span> <span class="s2">"Choose your node resource group name"</span></code></pre></figure>
+
+<h1 id="configuration">Configuration</h1>
+<ul>
+  <li>Initialize the AKS cluster by adding in the desired node pool configurations, update schedules, diagnostics, and namespaces that weren’t included in your script</li>
+  <li>Initialize the PGSQL Database 
+In <code class="language-plaintext highlighter-rouge">Server Parameters</code> on the Azure portal, find azure.extension and from the dropdown, add <code class="language-plaintext highlighter-rouge">CITEXT</code>, <code class="language-plaintext highlighter-rouge">HSTORE</code>, and <code class="language-plaintext highlighter-rouge">UUID-OSSP</code> extensions, click save.</li>
+</ul>
+
+<p>Connecting to the PGSQL instance with the default account in a terminal</p>
+
+<ul>
+  <li>
+    <p>Create the new database - I called mine <code class="language-plaintext highlighter-rouge">terraform_enterprise</code></p>
+  </li>
+  <li>
+    <p>Grant access for the terraform user account to have full control over schemas</p>
+  </li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="no">GRANT</span> <span class="no">ALL</span> <span class="no">PRIVILEGES</span> <span class="no">ON</span> <span class="no">DATABASE</span> <span class="s2">"DB_Name"</span> <span class="no">TO</span> <span class="s2">"TF_Username"</span><span class="p">;</span>
+<span class="no">GRANT</span> <span class="no">ALL</span> <span class="no">PRIVILEGES</span> <span class="no">ON</span> <span class="no">ALL</span> <span class="no">TABLES</span> <span class="no">IN</span> <span class="no">SCHEMA</span> <span class="kp">public</span> <span class="no">TO</span> <span class="s2">"TF_Username"</span><span class="p">;</span>
+<span class="no">GRANT</span> <span class="no">ALL</span> <span class="no">PRIVILEGES</span> <span class="no">ON</span> <span class="no">ALL</span> <span class="no">SEQUENCES</span> <span class="no">IN</span> <span class="no">SCHEMA</span> <span class="kp">public</span> <span class="no">TO</span> <span class="s2">"TF_Username"</span><span class="p">;</span>
+<span class="no">GRANT</span> <span class="no">ALL</span> <span class="no">ON</span> <span class="no">SCHEMA</span> <span class="kp">public</span> <span class="no">TO</span> <span class="s2">"TF_Username"</span><span class="p">;</span></code></pre></figure>
+
+<h1 id="deploy-terraform">Deploy Terraform</h1>
+<p>In a local terminal, you will need to autheticate and grab the Terraform Enterprise Image.</p>
+
+<ul>
+  <li>Log in to the Terraform Enterprise container image registry.
+The <code class="language-plaintext highlighter-rouge">UserName</code> is <code class="language-plaintext highlighter-rouge">Terraform</code> and password is your license file value. (The below script will save you from entering it manually)</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">cat</span> <span class="o">&lt;</span><span class="no">PATH_TO_HASHICORP_LICENSE_FILE</span><span class="o">&gt;</span> <span class="o">|</span>  <span class="n">docker</span> <span class="n">login</span> <span class="o">--</span><span class="n">username</span> <span class="n">terraform</span> <span class="n">images</span><span class="p">.</span><span class="nf">releases</span><span class="p">.</span><span class="nf">hashicorp</span><span class="p">.</span><span class="nf">com</span> <span class="o">--</span><span class="n">password</span><span class="o">-</span><span class="n">stdin</span></code></pre></figure>
+
+<ul>
+  <li>Pull the Terraform Enterprise image from the registry as a test.</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">docker</span> <span class="n">pull</span> <span class="n">images</span><span class="p">.</span><span class="nf">releases</span><span class="p">.</span><span class="nf">hashicorp</span><span class="p">.</span><span class="nf">com</span><span class="o">/</span><span class="n">hashicorp</span><span class="o">/</span><span class="n">terraform</span><span class="o">-</span><span class="n">enterprise</span><span class="ss">:&lt;</span><span class="n">vYYYYMM</span><span class="o">-</span><span class="c1">#&gt;</span></code></pre></figure>
+
+<ul>
+  <li>Create your AKS namespace</li>
+  <li>Create an secret within your AKS for accessing the image</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">kubectl</span> <span class="n">create</span> <span class="n">secret</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span> <span class="n">terraform</span><span class="o">-</span><span class="n">enterprise</span> <span class="o">--</span><span class="n">docker</span><span class="o">-</span><span class="n">server</span><span class="o">=&lt;</span><span class="no">DOCKER_REGISTRY_URL</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">docker</span><span class="o">-</span><span class="n">username</span><span class="o">=&lt;</span><span class="no">DOCKER_REGISTRY_USERNAME</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">docker</span><span class="o">-</span><span class="n">password</span><span class="o">=&lt;</span><span class="no">DOCKER_REGISTRY_PASSWORD</span><span class="o">&gt;</span>  <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="no">TFE_NAMESPACE</span><span class="o">&gt;</span></code></pre></figure>
+
+<ul>
+  <li>Fill out the values file
+A copy of the values file can be obtained at <a href="https://github.com/hashicorp/terraform-enterprise-helm/blob/main/values.yaml">Hashicorp Terraform Enterprise Github Page</a></li>
+</ul>
+
+<p>Reference for the values can be found at <a href="https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/configuration">Configuration Reference</a></p>
+
+<ul>
+  <li>Kick off the install
+Finally, it’s time to deploy Terraform Enterprise on AKS!</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">helm</span> <span class="n">install</span> <span class="n">terraform</span><span class="o">-</span><span class="n">enterprise</span> <span class="n">hashicorp</span><span class="o">/</span><span class="n">terraform</span><span class="o">-</span><span class="n">enterprise</span> <span class="o">--</span><span class="n">namespace</span> <span class="o">&lt;</span><span class="no">YOUR_NAMESPACE</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">f</span> <span class="s2">"Pathtovalues.yaml"</span></code></pre></figure>
+
+<h1 id="example-values-file">Example Values file</h1>
+
+<p>Since I found it quite difficult to get all the right values, I’m supplying my own example one, hope it helps!</p>
+
+<p><a href="https://gist.github.com/RawPatty/ec880f0962f534ea5866511f208ab4a3">Sample Values File</a></p>
+
+<h2 id="reference-documentation">Reference Documentation</h2>
+
+<p><a href="https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/kubernetes/install">Hashicorp Terraform Enterprise FDO Kubernetes install guide</a></p>]]></content><author><name></name></author><summary type="html"><![CDATA[After a long hiatus I’m back with another writeup!]]></summary></entry><entry><title type="html">Recovery Services Vault Immutability</title><link href="http://localhost:4000/2023/04/04/Recovery-services-vault-immutability.html" rel="alternate" type="text/html" title="Recovery Services Vault Immutability" /><published>2023-04-04T04:40:00-07:00</published><updated>2023-04-04T04:40:00-07:00</updated><id>http://localhost:4000/2023/04/04/Recovery-services-vault-immutability</id><content type="html" xml:base="http://localhost:4000/2023/04/04/Recovery-services-vault-immutability.html"><![CDATA[<p>Feature announced for <a href="https://azure.microsoft.com/en-au/updates/azure-backup-immutable-vaults-ga/">General Availability</a> in March 13, 2023</p>
+
+<p>I’ll just be covering this for the Recovery Services Vault service as it’s what most enterprises would use to secure production data.</p>
+
+<h2 id="what-is-immutability">What is immutability?</h2>
+
+<p>Immutability of backups refers to the ability to ensure that backup data remains unaltered and cannot be deleted or modified for a specified period of time.
+For Azure Backup vaults, there are 3 levels of immutability a vault can have</p>
+
+<ul>
+  <li>Disabled - The vault doesn’t have any immutability controls set</li>
+  <li>Enabled  - The vault will not allow operations that could result in a loss of data, this control can be turned off</li>
+  <li>Enabled and locked - As above, with the extra control that the control cannot be turned off</li>
+</ul>
+
+<p>This service is offered for both Azure Recovery Services Vaults and Azure Backup Vaults, enabling immutability prevents the following actions:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operation Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Stop protection with delete data</td>
+      <td>A protected item can’t have its recovery points deleted before their respective expiry date. However, you can still stop protection of the instances while retaining data forever or until their expiry. (Same for Backup Vault)</td>
+    </tr>
+    <tr>
+      <td>Modify backup policy to reduce retention</td>
+      <td>Any actions that reduce the retention period in a backup policy are disallowed on Immutable vault. However, you can make policy changes that result in the increase of retention. You can also make changes to the schedule of a backup policy.</td>
+    </tr>
+    <tr>
+      <td>Change backup policy to reduce retention</td>
+      <td>Any attempt to replace a backup policy associated with a backup item with another policy with retention lower than the existing one is blocked. However, you can replace a policy with the one that has higher retention.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="why-would-i-want-immutability">Why would I want immutability?</h2>
+
+<p>This feature within Azure Backup is important for data protection and compliance, as it protects against accidental or malicious deletion of backups or tampering with backup policies that could result in a reduction of backups.</p>
+
+<p>By enabling immutability, backups are made read-only (cannot be deleted) and can only be accessed for restore purposes. This helps to protect against ransomware attacks, accidental deletion, or any unauthorized modification to backup data.</p>
+
+<h2 id="what-about-my-previously-set-recovery-services-vault-security-controls">What about my previously set recovery services vault security controls?</h2>
+
+<p>Previously there was an irreversable security settings control which would email all subscription administrators whenever backup data was to be deleted, these would enter a soft-delete state for period of time with alerting. As a vault could not be removed before all backup data inside was removed, this essentially prevented the vault from deletion.</p>
+
+<p>I’ve had a look around and it looks like these have now been separated out under “Enable soft delete and security settings for hybrid workloads”, although it looks like this checkbox can now be toggled off, the immutability control looks like it’s been separated out for more granular control.</p>
+
+<p>Keep in mind this is not vault immutability! While it does help prevent your data from being deleted, this does not seem to prevent the switching of policies or reducing the retention period of existing policies that are used by a VM.</p>
+
+<p><img src="/images/2023/Soft Delete Controls.png" alt="Soft Delete Controls" /></p>
+
+<p>The previous controls around security features:</p>
+
+<p><img src="/images/2023/oldsecuritysettings.png" alt="oldsecuritysettings" /></p>
+
+<h2 id="approach-to-adoption">Approach to adoption</h2>
+
+<p>As the enabled and locked form is actually what is immutable, this would be the target final state.</p>
+
+<p>However as this state restricts our abillity to reduce and modify vault policy to be shorter, I would recommend enabling vault immutability (without locking) for a period of time until backup policies have been finalised before locking.</p>
+
+<h2 id="how-do-i-to-set-this-control">How do I to set this control?</h2>
+
+<p>You will first need <code class="language-plaintext highlighter-rouge">Contributor</code> or above permissions to the resource or the immutablility controls will not show</p>
+
+<p>Within your Recovery Services Vault (1), navigate to properties (2), under “Immutable Vault”, select the “Settings” button (3) and update the immutability settings as required (4)</p>
+
+<p><img src="/images/2023/Enable Vault Immutabilty.png" alt="Enable Vault Immutability" /></p>
+
+<h2 id="microsoft-documentation">Microsoft Documentation</h2>
+
+<p><a href="https://learn.microsoft.com/en-us/azure/backup/backup-azure-immutable-vault-concept">Immutable vault for Azure Backup</a></p>]]></content><author><name></name></author><summary type="html"><![CDATA[Feature announced for General Availability in March 13, 2023]]></summary></entry><entry><title type="html">Azure reservation roles - Adding Reservation Administrator, reader, and purchaser</title><link href="http://localhost:4000/2023/01/08/Azure-reservation-roles.html" rel="alternate" type="text/html" title="Azure reservation roles - Adding Reservation Administrator, reader, and purchaser" /><published>2023-01-08T00:47:29-08:00</published><updated>2023-01-08T00:47:29-08:00</updated><id>http://localhost:4000/2023/01/08/Azure-reservation-roles</id><content type="html" xml:base="http://localhost:4000/2023/01/08/Azure-reservation-roles.html"><![CDATA[<p>Starting Feb 20, 2023 -  Azure EA enrollments will only be able to be managed within the Azure Portal</p>
+
+<p>Feature announced for <a href="https://azure.microsoft.com/en-us/updates/general-availability-reservation-administrator-and-reader-roles-in-azure-portal/">General Availability</a> in August 2, 2022</p>
+
+<p>Having had a bit of a play, here are my notes to summarise - as always please reach out to make any corrections</p>
+
+<h2 id="new-roles-for-reservations">New roles for Reservations</h2>
+
+<p>There are three granular roles to help manage access to Azure reservations:</p>
+
+<ul>
+  <li>Reservation Administrator - Directory role assigned at Reservation -&gt; Role Assignment</li>
+  <li>Reservation Reader - Directory role assigned at Reservation -&gt; Role Assignment</li>
+  <li>Reservation Purchaser - Resource RBAC Permission assigned at resource group, subscription, or management group levels</li>
+</ul>
+
+<p>The role of <code class="language-plaintext highlighter-rouge">Reservation Reader</code> and <code class="language-plaintext highlighter-rouge">Reservation Administrator</code> are notable as they allow a user to gain visibility and control over all existing reservations tied to the tenant, instead of needing to grant access to each reservation order retroactively.</p>
+
+<h2 id="understanding-where-reservations-sit-within-azure">Understanding where reservations sit within Azure</h2>
+
+<p>Reservations are a bit of a strange resource type, they don’t follow the usual resource flow of sitting under a subscription.</p>
+
+<p>Instead, the reservation service sits under the tenant as <code class="language-plaintext highlighter-rouge">providers/Microsoft.capacity</code> and do not inherit permissions from a subscription, as they don’t sit under a subscription, RBAC roles of <code class="language-plaintext highlighter-rouge">Owner</code> or <code class="language-plaintext highlighter-rouge">Contributor</code> will not allow you to manage all reservations - though <code class="language-plaintext highlighter-rouge">Owners</code> for a subscription can manage reservations for that particular subscription for which they are an <code class="language-plaintext highlighter-rouge">Owner</code> - the above roles will unlock the ability to see across all reservations within the tenant once assigned.</p>
+
+<h2 id="permissions-required">Permissions required</h2>
+
+<p>As the reservation resource is under the tenant instead of any subscriptions, you will need to be a <code class="language-plaintext highlighter-rouge">Global Administrator</code> and elevate <code class="language-plaintext highlighter-rouge">User Access Administrator</code> privileges to assign these roles, this can be done via:</p>
+
+<p><code class="language-plaintext highlighter-rouge">Azure Active Directory -&gt; properties</code> and select “Yes” for <code class="language-plaintext highlighter-rouge">"Access management for Azure resources"</code></p>
+
+<p>As <code class="language-plaintext highlighter-rouge">Reservation Purchaser</code> is a resource level role, it can be assigned by an <code class="language-plaintext highlighter-rouge">Owner</code> of the resource group, subscription, or management group</p>
+
+<h2 id="assigning-the-roles">Assigning the roles</h2>
+
+<p>In what is a bit of a confusing twist, reservation roles are actually directory roles, but are instead assigned under
+<code class="language-plaintext highlighter-rouge">Reservations -&gt; role assignment</code></p>
+
+<p>instead of
+<code class="language-plaintext highlighter-rouge">Azure Active Directory -&gt; roles and administrators</code></p>
+
+<p>Hoping this will eventually be unified.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Owners</code> can assign to mangement groups, subscriptions, and resource groups the <code class="language-plaintext highlighter-rouge">Reservation Purchaser role</code>, I believe this is to make scoped reservations), while the <code class="language-plaintext highlighter-rouge">Reservation Administrator</code> and <code class="language-plaintext highlighter-rouge">Reservation Reader</code> roles are directory roles only assignable currently under the Reservation tab by a <code class="language-plaintext highlighter-rouge">Global Administrator</code> with <code class="language-plaintext highlighter-rouge">User Access Administrator</code> elevation activated.</p>
+
+<h2 id="how-about-privileged-identity-management-pim">How about Privileged Identity Management (PIM)?</h2>
+
+<p>As the resource is tied to the tenant, but the assignment is a directory role, there is no apparent direct way to assign a PIM control for Reservation Administrators or Readers as the PIM roles only allow assignment of roles that are grantable within the Azure AD roles page, and does not cover the roles assignable within the Reservation resource.</p>
+
+<p>Working around the problem, I was able to create a Privileged Access Group that is assigned a <code class="language-plaintext highlighter-rouge">Reservation Administrator</code> for our users to temporarily obtain membership to do reservation mangement</p>
+
+<h2 id="existing-reservation-orders">Existing Reservation Orders</h2>
+
+<p>As usual, any <code class="language-plaintext highlighter-rouge">Enterprise Administrator</code> may assign permissions to individual reservation orders to users, and the user will have visibility on that individual item, but these new roles allow for control over a wider scope.</p>
+
+<h2 id="microsoft-documentation">Microsoft Documentation</h2>
+
+<p><a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/view-reservations">Permissions to view and manage Azure reservations</a></p>
+
+<p><a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/prepare-buy-reservation?toc=%2Fazure%2Fcost-management-billing%2Freservations%2Ftoc.json">Buying Reservations</a></p>
+
+<p><a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/direct-ea-administration">EA Administration guide</a></p>]]></content><author><name></name></author><summary type="html"><![CDATA[Starting Feb 20, 2023 - Azure EA enrollments will only be able to be managed within the Azure Portal]]></summary></entry><entry><title type="html">Github.io Blog Quickstart for Windows 10</title><link href="http://localhost:4000/2022/12/03/Github-blog-quickstart.html" rel="alternate" type="text/html" title="Github.io Blog Quickstart for Windows 10" /><published>2022-12-03T00:47:29-08:00</published><updated>2022-12-03T00:47:29-08:00</updated><id>http://localhost:4000/2022/12/03/Github-blog-quickstart</id><content type="html" xml:base="http://localhost:4000/2022/12/03/Github-blog-quickstart.html"><![CDATA[<p>Having written a few blog posts in the past on my medium blog, I was inspired to move to blogging on Github pages like a “real” developer now that I’ve gotten comfortable writing posts.</p>
+
+<p>As someone with an Infrastructure background, it was a bit daunting to get started, so part of this was also for my personal learning - I also wanted to start centralising my code and blog posts instead of having to create and link gists in Github as I currently do on Medium</p>
+
+<p>As it took me quite a bit of time to set this all up (best part of a weekend), I thought it appropriate to make the first blog post about how I got the blog started.
+I followed the <a href="https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/about-github-pages-and-jekyll">quickstart-guide-on-Github</a>, so most of the content will be similar, but with a few twists to accomodate my own setup.</p>
+
+<p>I run Windows 10, so to use the linux-based commands I ended up setting up an Ubuntu Dev container in my VSCode, guide here: <a href="https://code.visualstudio.com/docs/devcontainers/containers">VS-Code-Container-Guide</a></p>
+
+<p>The DockerFile image I used is modified from <a href="https://github.com/microsoft/vscode-dev-containers/blob/v0.122.1/containers/ubuntu/.devcontainer/base.Dockerfile">Docker-Image-Source</a></p>
+
+<p>I first created a repository in Github named <code class="language-plaintext highlighter-rouge">username.github.io</code>
+I installed Ruby on my container with <code class="language-plaintext highlighter-rouge">sudo apt-get install ruby-full build-essential zlib1g-dev</code>
+I installed Bundle on my container with <code class="language-plaintext highlighter-rouge">sudo apt-get install bundle</code></p>
+
+<p>I setup my Ruby gem environment variables first before installing</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">export</span> <span class="no">GEM_HOME</span><span class="o">=</span><span class="s2">"$HOME/gems
+export PATH="</span><span class="vg">$HOME</span><span class="o">/</span><span class="n">gems</span><span class="o">/</span><span class="n">bin</span><span class="p">:</span><span class="vg">$PATH</span><span class="s2">"
+gem install jekyll bundler</span></code></pre></figure>
+
+<p>I switched into my <code class="language-plaintext highlighter-rouge">docs</code> directory with cd commands and ran <code class="language-plaintext highlighter-rouge">jekyll new --skip-bundle</code>
+which gave me the output <code class="language-plaintext highlighter-rouge">New jekyll site installed in /home/john/workspace/rawpatty.github.io/docs</code></p>
+
+<p>Finally, I modified the configuration GemFile with <code class="language-plaintext highlighter-rouge">vi GemFile</code> (requires vi to be installed)</p>
+
+<p>First I commented out <code class="language-plaintext highlighter-rouge">gem "jekyll", "~&gt; 4.3.1"</code></p>
+
+<p>Then I modified the line starting <code class="language-plaintext highlighter-rouge">gem "github-pages"</code> to</p>
+
+<p><code class="language-plaintext highlighter-rouge">gem "github-pages", "~&gt; 227", group: :jekyll_plugins</code></p>
+
+<p>Then ran <code class="language-plaintext highlighter-rouge">bundle install</code></p>
+
+<p>And that was it!</p>
+
+<p>New posts are written in markdown under the <code class="language-plaintext highlighter-rouge">_posts</code> folder and follow the naming format
+<code class="language-plaintext highlighter-rouge">YEAR-MONTH-DAY-title.MARKUP</code></p>
+
+<p>Where <code class="language-plaintext highlighter-rouge">YEAR</code> is a four-digit number, <code class="language-plaintext highlighter-rouge">MONTH</code> and <code class="language-plaintext highlighter-rouge">DAY</code> are both two-digit numbers, and <code class="language-plaintext highlighter-rouge">MARKUP</code> is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.</p>
+
+<p>A part that had confused me for a while was how to locate the actual post you wrote, but the URL is generated following your page name with the dates as dividers (I will update this as I learn more)
+eg.
+<code class="language-plaintext highlighter-rouge">https://rawpatty.github.io/jekyll/update/2022/12/03/First-page-example.html</code></p>
+
+<p>Things I want to learn next are how to add pictures, categorise articles into their own repos, and how to simplify the URL so it removes the <code class="language-plaintext highlighter-rouge">jekyll/update</code> path</p>
+
+<p>Stay Tuned (and hopefully I don’t procrastinate this)</p>
+
+<p>Updates: Turns out the URL is generated from the categories, so as above I would have two categories of jekyll and update - by removing the categories section, I was able to make the blog post directly link appear without categories appearing in the URL.</p>
+
+<p><img src="/images/2022/removeCategories.png" alt="RemoveCategories" /></p>
+
+<p>As my build directory on the Github page was set up in the docs folder rather than the root folder, I had to put my images folder within the docs folder for it to be referencable by Jekyll.</p>
+
+<p>Eg.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="o">!</span><span class="p">[</span><span class="no">RemoveCategories</span><span class="p">](</span><span class="sr">/images/</span><span class="mi">2022</span><span class="o">/</span><span class="n">removeCategories</span><span class="p">.</span><span class="nf">png</span><span class="p">)</span></code></pre></figure>
+
+<p>On the last item, there is a plugin that allows for the automation of this <a href="https://nhoizey.github.io/jekyll-postfiles/">jekyll-postfiles</a> , but the plugin is not supported to be used with Github Pages</p>
+
+<p>Edit: Oh yeah I also wanted to add that you can use the command <code class="language-plaintext highlighter-rouge">bundle exec jekyll serve</code> to locally serve the website for debugging purposes :) Enjoy!</p>
+
+<p>Below is some helpful source doco as part of the default page but I’ll leave in for interest:</p>
+
+<p>Check out the <a href="https://jekyllrb.com/docs/home">Jekyll docs</a> for more info on how to get the most out of Jekyll. File all bugs/feature requests at <a href="https://github.com/jekyll/jekyll">Jekyll’s GitHub repo</a>. If you have questions, you can ask them on <a href="https://talk.jekyllrb.com/">Jekyll Talk</a>.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Having written a few blog posts in the past on my medium blog, I was inspired to move to blogging on Github pages like a “real” developer now that I’ve gotten comfortable writing posts.]]></summary></entry><entry><title type="html">Permissions required to set up service connections in Azure DevOps</title><link href="http://localhost:4000/2022/09/14/Permissions-to-set-up-service-connections-in-ADO.html" rel="alternate" type="text/html" title="Permissions required to set up service connections in Azure DevOps" /><published>2022-09-14T01:47:29-07:00</published><updated>2022-09-14T01:47:29-07:00</updated><id>http://localhost:4000/2022/09/14/Permissions-to-set-up-service-connections-in-ADO</id><content type="html" xml:base="http://localhost:4000/2022/09/14/Permissions-to-set-up-service-connections-in-ADO.html"><![CDATA[<p>Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here’s a rundown of the permissions you’ll need.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="/images/2022/AzureDevops1.png" alt="AzureDevops1" /></td>
+    </tr>
+    <tr>
+      <td><em>Ever wondered what happens behind the scenes when you select the automatic option when creating a new service connection in Azure DevOps?</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="what-is-happening-when-you-set-thisup">What is happening when you set this up?</h2>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="/images/2022/AzureDevops2.png" alt="AzureDevops2" /></td>
+    </tr>
+    <tr>
+      <td><em>We’ll cover the case of subscription - but the principles are the same</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The objective of a service connection is to allow your Azure DevOps environment to interact with your Azure resources.</p>
+
+<p>When you submit the above form with the “Automatic” setup option, Azure DevOps uses your existing user context to</p>
+
+<ol>
+  <li>Create a service principal /app registration in your Azure AD</li>
+  <li>Assign contributor permissions to this service principal at the assigned scope</li>
+  <li>Register the connection with Azure DevOps by creating a secret key and using that in the project’s service connection</li>
+</ol>
+
+<p>To fulfill these tasks you will need the following permissions:</p>
+
+<ol>
+  <li>To create a service principal, you’ll need permissions over the directory. Users who need permissions could be assigned the Azure AD Role of Application Developer or Application Administrator</li>
+  <li>To grant contributor permissions to the desired scope, you will need to have “reader” permissions on the subscription to navigate the subscription filter and “Owner” permissions to grant a role over the desired scope. You can also choose no resource group which will assign the service principal “contributor” role at the subscription level)</li>
+</ol>
+
+<h2 id="but-how-does-the-manual-optionwork">but how does the “manual” option work?</h2>
+
+<p>In a very similar way to the “automatic” option, but instead of creating a new service principal/app registration, the “manual” method uses an existing one.</p>
+
+<p>Simply fill in your desired scope of subscription and enter the application ID under “Service Principal Id”.</p>
+
+<p>The service principal key will need to be manually created, you can reach the page via Azure AD -&gt; App Registrations -&gt; Certificates &amp; Secrets -&gt; Client Secrets. Note that creating a key here will show you the value one time.</p>
+
+<p><img src="/images/2022/AzureDevops3.png" alt="AzureDevops3" /></p>
+
+<p>Remember to renew and update these keys when they expire!</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here’s a rundown of the permissions you’ll need.]]></summary></entry><entry><title type="html">Jenkins Containers with Az Powershell</title><link href="http://localhost:4000/2022/09/14/Jenkins-Containers-with-Az-PowerShell.html" rel="alternate" type="text/html" title="Jenkins Containers with Az Powershell" /><published>2022-09-14T01:47:29-07:00</published><updated>2022-09-14T01:47:29-07:00</updated><id>http://localhost:4000/2022/09/14/Jenkins-Containers-with-Az-PowerShell</id><content type="html" xml:base="http://localhost:4000/2022/09/14/Jenkins-Containers-with-Az-PowerShell.html"><![CDATA[<p>Recently I’ve been working on some Jenkins pipelines. I wanted to manipulate some Azure resources as part of the pipeline execution - the solution decided on was to use an Az Powershell - enabled container to execute the code.</p>
+
+<p>The Jenkins app is hosted in Azure Kubernetes Services which is why the executing agent is Kubernetes - some improvements to the below gist could include:</p>
+
+<ul>
+  <li>Capturing Kubernetes agent YAML in a separate file</li>
+  <li>Capturing desired PowerShell code in a file and referencing that for the container to execute</li>
+  <li>Creation of a PowerShell Secret object to provide the Connect-AzAccount command - pulling from environmental variables etc.</li>
+</ul>
+
+<script src="https://gist.github.com/08f93b0ff9fcccf2de36aa4007c5fcdf.js"> </script>]]></content><author><name></name></author><summary type="html"><![CDATA[Recently I’ve been working on some Jenkins pipelines. I wanted to manipulate some Azure resources as part of the pipeline execution - the solution decided on was to use an Az Powershell - enabled container to execute the code.]]></summary></entry><entry><title type="html">Migrating existing Terraform-managed Azure Virtual Machines that aren’t in an availability zone to an availability zone</title><link href="http://localhost:4000/2022/06/30/Migrating-existing-Terraform-Azure-Virtual-Machines.html" rel="alternate" type="text/html" title="Migrating existing Terraform-managed Azure Virtual Machines that aren’t in an availability zone to an availability zone" /><published>2022-06-30T01:47:29-07:00</published><updated>2022-06-30T01:47:29-07:00</updated><id>http://localhost:4000/2022/06/30/Migrating-existing-Terraform-Azure-Virtual-Machines</id><content type="html" xml:base="http://localhost:4000/2022/06/30/Migrating-existing-Terraform-Azure-Virtual-Machines.html"><![CDATA[<p>Hi team, I wanted to write about a particular script I write over Christmas that helped to cut down the manual work required to move a whole raft of virtual machines to availability zones.</p>
+
+<h2 id="situation">Situation</h2>
+
+<p>We had multiple frontend VMs in a load-balanced configuration but not in availability zones.</p>
+
+<h2 id="task">Task</h2>
+
+<p>Migrate these VMs across the Availability Zones in the Azure Region to take advantage of the (basically free - since we’re already paying for the VMs) zonal redundancy</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>The Azure Resource Mover only supports cross-regional resource movement. Within a particular Azure region, only AZ-AZ regional migration is supported via Site Recovery. There is no native support for non-AZ to AZ VM migrations.</p>
+
+<p>Your company also uses basic Terraform modules to manage the configuration of the VMs, which means a lot of post-migration Terraform changes if we follow the idea of snapshotting and recreating the resource as detailed in <a href="https://blog.pantos.name/2019/10/15/move-an-azure-vm-to-an-availability-zone/">kpantos’s</a> blog post.</p>
+
+<p>Your company also uses Terraform, specifically the azurerm_linux_virtual_machine module which does not support attaching OS disks.
+To minimize the amount of variable refactoring in Terraform, I’ve written a PowerShell script that will perform the following tasks:</p>
+
+<ul>
+  <li>Stop the VM</li>
+  <li>Detach, snapshot, and restore all data disks to the desired zone (As data disks need to be in the same zone as the VM object to be eligible to attach)</li>
+  <li>Create a new image with Azure Compute Gallery (Set this up beforehand)</li>
+  <li>Delete the original VM</li>
+  <li>Create the new VM based on the image, in the specified zone, having the same configuration as the original</li>
+  <li>Attaches NIC and restored disks.</li>
+</ul>
+
+<p>After running the script across the machines (one at a time under strict change control of course. I’m not a cowboy - yee haw!), on the Terraform side the following need to be changed so Terraform doesn’t delete your resource - The below is pretty generic advice that applied to our Terraform module which is quite basic - so while this was all I required, your mileage may vary:</p>
+
+<ul>
+  <li>Any availability sets are not compatible with availability zones, so remove this resource type from the resource module</li>
+  <li>A <code class="language-plaintext highlighter-rouge">zone</code> variable will need to be added for the VM and the data disk modules</li>
+  <li>A <code class="language-plaintext highlighter-rouge">"source_image_id"</code> will need to be added for the VM module (obtainable from the resource “JSON view” on the “Overview” page - under <code class="language-plaintext highlighter-rouge">"imageReference"</code>)</li>
+  <li>The <code class="language-plaintext highlighter-rouge">"source_resource_id"</code> variable will need to be added for the data disk module</li>
+  <li>The <code class="language-plaintext highlighter-rouge">createOption</code> of the OsDisk will need to be <code class="language-plaintext highlighter-rouge">"FromImage"</code></li>
+  <li>The <code class="language-plaintext highlighter-rouge">createOption</code> of the data disk will need to be <code class="language-plaintext highlighter-rouge">"Copy"</code></li>
+</ul>
+
+<p>After the above changes, the Terraform plan running on this resource should only plan changes related to extensions, tags, and diagnostics settings, applying these will bring your VM back to a managed state.
+The average runtime of the script is around 35 minutes per machine from start to finish - though you may want to run it in sections
+The script is available at my GitHub page linked <a href="https://github.com/RawPatty/Azure-Scripts/blob/main/AZ%20Migration/azmigration.ps1">azmigration-script</a></p>]]></content><author><name></name></author><summary type="html"><![CDATA[Hi team, I wanted to write about a particular script I write over Christmas that helped to cut down the manual work required to move a whole raft of virtual machines to availability zones.]]></summary></entry><entry><title type="html">Copying Azure SQL Databases across Subscriptions and Servers</title><link href="http://localhost:4000/2022/06/18/Copying-Azure-SQL-databases-across-subs-and-servers.html" rel="alternate" type="text/html" title="Copying Azure SQL Databases across Subscriptions and Servers" /><published>2022-06-18T01:47:29-07:00</published><updated>2022-06-18T01:47:29-07:00</updated><id>http://localhost:4000/2022/06/18/Copying-Azure-SQL-databases-across-subs-and-servers</id><content type="html" xml:base="http://localhost:4000/2022/06/18/Copying-Azure-SQL-databases-across-subs-and-servers.html"><![CDATA[<p>In a working environment, oftentimes data needs to be copied from the production database to lower environments.</p>
+
+<p>Below I will show a quick method to copy Azure SQL databases across different SQL servers and subscriptions.</p>
+
+<p>If you have been exporting and importing databases in the past, this method will be much faster and guarantees transaction consistency with Azure’s copy functionality. While in the GUI it looks like you are only able to copy to other servers in the subscription, you can circumvent this restriction with SSMS.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<p>You will need administrative access to both Azure SQL servers, and be able to connect to them via SSMS.</p>
+
+<h2 id="method">Method</h2>
+
+<p>In SSMS Connect to both the source and target SQL servers</p>
+
+<p>In the source server, add the admin account of the target server with DB owner permissions, here are the commands:</p>
+
+<p>Master database</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="no">CREATE</span> <span class="no">LOGIN</span> <span class="n">sourceadmin</span> <span class="p">(</span><span class="n">replace</span> <span class="n">this</span> <span class="n">with</span> <span class="n">your</span> <span class="n">target</span><span class="err">’</span><span class="n">s</span> <span class="n">admin</span> <span class="n">account</span> <span class="nb">name</span><span class="p">)</span> <span class="no">WITH</span> <span class="no">PASSWORD</span> <span class="o">=</span> <span class="err">‘</span><span class="o">**********</span><span class="err">’</span><span class="p">;</span><span class="sb">` (Choose a password)</span></code></pre></figure>
+
+<p>On the target database:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="no">CREATE</span> <span class="no">USER</span> <span class="n">sourceadmin</span> <span class="no">FROM</span> <span class="no">LOGIN</span> <span class="n">sourceadmin</span> <span class="p">;</span>
+<span class="nb">exec</span> <span class="n">sp_addrolemember</span> <span class="err">‘</span><span class="n">db_owner</span><span class="err">’</span><span class="p">,</span> <span class="err">‘</span><span class="n">sql1uvadmin</span><span class="err">’</span><span class="p">;</span>
+<span class="no">GO</span></code></pre></figure>
+
+<p>Once the permissions have been set, run the below line to create a new DB</p>
+
+<p><code class="language-plaintext highlighter-rouge">CREATE DATABASE lowerEnvDBname AS COPY OF SourceServer.DatabaseName;</code></p>
+
+<p>That’s it!</p>
+
+<p>You may (or may not) want to clean up the account you created in your production environment at the start</p>]]></content><author><name></name></author><summary type="html"><![CDATA[In a working environment, oftentimes data needs to be copied from the production database to lower environments.]]></summary></entry></feed>

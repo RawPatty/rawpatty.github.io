@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Permissions required to set up service connections in Azure DevOps | John Sun’s notes</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Permissions required to set up service connections in Azure DevOps" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here’s a rundown of the permissions you’ll need." />
+<meta property="og:description" content="Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here’s a rundown of the permissions you’ll need." />
+<link rel="canonical" href="http://localhost:4000/2022/09/14/Permissions-to-set-up-service-connections-in-ADO.html" />
+<meta property="og:url" content="http://localhost:4000/2022/09/14/Permissions-to-set-up-service-connections-in-ADO.html" />
+<meta property="og:site_name" content="John Sun’s notes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-09-14T01:47:29-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Permissions required to set up service connections in Azure DevOps" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-09-14T01:47:29-07:00","datePublished":"2022-09-14T01:47:29-07:00","description":"Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here’s a rundown of the permissions you’ll need.","headline":"Permissions required to set up service connections in Azure DevOps","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2022/09/14/Permissions-to-set-up-service-connections-in-ADO.html"},"url":"http://localhost:4000/2022/09/14/Permissions-to-set-up-service-connections-in-ADO.html"}</script>
+<!-- End Jekyll SEO tag -->
+<!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="John Sun&apos;s notes" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">John Sun&#39;s notes</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Permissions required to set up service connections in Azure DevOps</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2022-09-14T01:47:29-07:00" itemprop="datePublished">Sep 14, 2022
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here’s a rundown of the permissions you’ll need.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="/images/2022/AzureDevops1.png" alt="AzureDevops1" /></td>
+    </tr>
+    <tr>
+      <td><em>Ever wondered what happens behind the scenes when you select the automatic option when creating a new service connection in Azure DevOps?</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="what-is-happening-when-you-set-thisup">What is happening when you set this up?</h2>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="/images/2022/AzureDevops2.png" alt="AzureDevops2" /></td>
+    </tr>
+    <tr>
+      <td><em>We’ll cover the case of subscription - but the principles are the same</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The objective of a service connection is to allow your Azure DevOps environment to interact with your Azure resources.</p>
+
+<p>When you submit the above form with the “Automatic” setup option, Azure DevOps uses your existing user context to</p>
+
+<ol>
+  <li>Create a service principal /app registration in your Azure AD</li>
+  <li>Assign contributor permissions to this service principal at the assigned scope</li>
+  <li>Register the connection with Azure DevOps by creating a secret key and using that in the project’s service connection</li>
+</ol>
+
+<p>To fulfill these tasks you will need the following permissions:</p>
+
+<ol>
+  <li>To create a service principal, you’ll need permissions over the directory. Users who need permissions could be assigned the Azure AD Role of Application Developer or Application Administrator</li>
+  <li>To grant contributor permissions to the desired scope, you will need to have “reader” permissions on the subscription to navigate the subscription filter and “Owner” permissions to grant a role over the desired scope. You can also choose no resource group which will assign the service principal “contributor” role at the subscription level)</li>
+</ol>
+
+<h2 id="but-how-does-the-manual-optionwork">but how does the “manual” option work?</h2>
+
+<p>In a very similar way to the “automatic” option, but instead of creating a new service principal/app registration, the “manual” method uses an existing one.</p>
+
+<p>Simply fill in your desired scope of subscription and enter the application ID under “Service Principal Id”.</p>
+
+<p>The service principal key will need to be manually created, you can reach the page via Azure AD -&gt; App Registrations -&gt; Certificates &amp; Secrets -&gt; Client Secrets. Note that creating a key here will show you the value one time.</p>
+
+<p><img src="/images/2022/AzureDevops3.png" alt="AzureDevops3" /></p>
+
+<p>Remember to renew and update these keys when they expire!</p>
+
+  </div><a class="u-url" href="/2022/09/14/Permissions-to-set-up-service-connections-in-ADO.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">John Sun&#39;s notes</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">John Sun&#39;s notes</li><li><a class="u-email" href="mailto:johnsunjohn@msn.com">johnsunjohn@msn.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/rawpatty"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">rawpatty</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A collection of notes from experience working across Microsoft technologies</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

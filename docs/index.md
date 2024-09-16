@@ -3,7 +3,7 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: custom_home
-title: "Home"
+title: ""
 ---
 
 # You've reached my blog

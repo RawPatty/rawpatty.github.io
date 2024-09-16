@@ -39,21 +39,21 @@
   /* Medium screens (tablets, small laptops) */
   @media (max-width: 1024px) {
     #responsive-iframe {
-      height: 4050px; /* Adjust height for medium screens */
+      height: 3400px; /* Adjust height for medium screens */
     }
   }
   
   /* Small screens (large phones) */
   @media (max-width: 768px) {
     #responsive-iframe {
-      height: 5500px; /* Adjust height for mobile phones */
+      height: 3800px; /* Adjust height for mobile phones */
     }
   }
   
   /* Very small screens (small phones) */
   @media (max-width: 480px) {
     #responsive-iframe {
-      height: 9000px; /* Adjust height for small phones */
+      height: 4200px; /* Adjust height for small phones */
     }
   }
   

@@ -2,5 +2,31 @@
 # This is the file to edit for custom styles
 ---
 @import "minima";
-body {
-}
+    // Set the base font family
+    body {
+      font-weight: 400;
+      color: #1d1d1f; // Dark gray text color
+    }
+
+//Mobile Friendly
+  @media (max-width: 600px) {
+    .site-navigation ul {
+      flex-direction: column;
+    }
+  
+    .site-navigation li {
+      margin-bottom: 10px;
+      margin-right: 0;
+    }
+  
+    .header, .footer {
+      text-align: center;
+    }
+  }
+// Make images edges rounded 
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+  

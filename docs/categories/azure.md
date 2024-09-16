@@ -6,7 +6,6 @@ permalink: /categories/azure/
 ---
 
 <article class="page-content">
-
   {% for post in site.categories[page.category] %}
     <div class="post-preview">
       <h2><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
@@ -16,5 +15,4 @@ permalink: /categories/azure/
     </div>
     <hr>
   {% endfor %}
-
 </article>

@@ -2,6 +2,9 @@
 layout: post
 title:  "Copying Azure SQL Databases across Subscriptions and Servers"
 date:   2022-06-18 08:47:29 +0000
+categories: [Azure]
+excerpt: "Quick method to copy Azure SQL databases across different SQL servers and Subscriptions."
+
 ---
 In a working environment, oftentimes data needs to be copied from the production database to lower environments.
 

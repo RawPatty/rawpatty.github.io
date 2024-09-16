@@ -2,6 +2,9 @@
 layout: post
 title:  "Jenkins Containers with Az Powershell"
 date:   2022-09-14 08:47:29 +0000
+categories: [Jenkins, Containers, Azure]
+excerpt: "Creating containers in AZ PowerShell"
+
 ---
 Recently I've been working on some Jenkins pipelines. I wanted to manipulate some Azure resources as part of the pipeline execution - the solution decided on was to use an Az Powershell - enabled container to execute the code.
 

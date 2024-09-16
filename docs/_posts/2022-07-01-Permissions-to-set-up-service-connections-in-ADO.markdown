@@ -2,6 +2,9 @@
 layout: post
 title:  "Permissions required to set up service connections in Azure DevOps"
 date:   2022-09-14 08:47:29 +0000
+categories: [Azure, Azure DevOps]
+excerpt: "Quick notes on permissions in Azure DevOps service connections"
+
 ---
 Are you experiencing errors when trying to set up new service connections in your Azure DevOps project? Here's a rundown of the permissions you'll need.
 

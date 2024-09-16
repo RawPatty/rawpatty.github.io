@@ -2,6 +2,9 @@
 layout: post
 title:  "Azure reservation roles - Adding Reservation Administrator, reader, and purchaser"
 date:   2023-01-08 08:47:29 +0000
+categories: [Azure, Cost Management]
+excerpt: "A summary of Azure reservation roles."
+
 ---
 Starting Feb 20, 2023 -  Azure EA enrollments will only be able to be managed within the Azure Portal
 

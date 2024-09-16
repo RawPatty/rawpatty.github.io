@@ -2,6 +2,9 @@
 layout: post
 title:  "Migrating existing Terraform-managed Azure Virtual Machines that aren’t in an availability zone to an availability zone"
 date:   2022-06-30 08:47:29 +0000
+categories: [Azure]
+excerpt: "Writeup of migrating Azure VMs from non-AZ to Available zones"
+
 ---
 Hi team, I wanted to write about a particular script I write over Christmas that helped to cut down the manual work required to move a whole raft of virtual machines to availability zones.
 

@@ -2,6 +2,9 @@
 layout: post
 title:  "Recovery Services Vault Immutability"
 date:   2023-04-04 11:40:00 +0000
+categories: [Azure, Security]
+excerpt: "A summary of the new vault immutability control in Azure Recovery Services Vaults."
+
 ---
 Feature announced for [General Availability] in March 13, 2023
 

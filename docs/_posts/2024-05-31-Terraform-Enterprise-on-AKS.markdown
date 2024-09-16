@@ -2,6 +2,9 @@
 layout: post
 title:  "Setting up Terraform Enterprise in a new private AKS cluster with the new Flexible Deployment Option"
 date:   2024-05-31 11:40:00 +0000
+categories: [Terraform]
+excerpt: "A writeup of my experience setting up Terraform Enterprise with the new 'Flexible Deployment Option'."
+
 ---
 After a long hiatus I'm back with another writeup!
 

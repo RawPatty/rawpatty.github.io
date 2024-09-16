@@ -20,6 +20,7 @@ TLDR; After working as an Infrastructure, DevOps, and Cloud Engineer, I've trans
   src="https://docs.google.com/document/d/12Zn4hgmaQLkWtzy9aAglmgDJiZM1HgDVECn3Wukhtls/pub?embedded=true"
   id="responsive-iframe"
   frameborder="0"
+  width="100%"
   scrolling="no"
   seamless>
 </iframe>

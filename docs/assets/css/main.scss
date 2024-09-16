@@ -27,22 +27,35 @@
 /* Base iframe styling for large screens (desktops) */
 #iframe-container iframe {
     width: 100%;
-    height: 3050px; /* Full height for large screens */
+    height: 3060px; /* Full height for large screens */
   }
 
-  @media (max-width: 1440px) {
+  @media (max-width: 1920px) {
     #responsive-iframe {
-      height: 3050px; /* Adjust height for medium screens */
+      height: 3060px; /* Adjust height for medium screens at 1080p */
     }
   }
     
   /* Medium screens (tablets, small laptops) */
+  @media (max-width: 1024px) {
+    #responsive-iframe {
+      height: 4050px; /* Adjust height for medium screens */
+    }
+  }
+  
+  /* Small screens (large phones) */
+  @media (max-width: 768px) {
+    #responsive-iframe {
+      height: 5500px; /* Adjust height for mobile phones */
+    }
+  }
+  
+  /* Very small screens (small phones) */
   @media (max-width: 480px) {
     #responsive-iframe {
       height: 9000px; /* Adjust height for small phones */
     }
   }
-  
   
   
 // Make images edges rounded 

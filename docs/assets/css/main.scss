@@ -37,23 +37,23 @@
   }
     
   /* Medium screens (tablets, small laptops) */
-  @media (max-width: 1024px) {
+  @media (max-width: 1000px) {
     #responsive-iframe {
-      height: 3400px; /* Adjust height for medium screens */
+      height: 3200px; /* Adjust height for medium screens */
     }
   }
   
   /* Small screens (large phones) */
   @media (max-width: 768px) {
     #responsive-iframe {
-      height: 4300px; /* Adjust height for mobile phones */
+      height: 4400px; /* Adjust height for mobile phones */
     }
   }
   
   /* Very small screens (small phones) */
   @media (max-width: 480px) {
     #responsive-iframe {
-      height: 4700px; /* Adjust height for small phones */
+      height: 5000px; /* Adjust height for small phones */
     }
   }
   
